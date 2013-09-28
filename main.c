@@ -95,29 +95,29 @@ int run(struct Connector input) {
   int i;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
-      input.conn.g.inputs++;
+      input.conn.g->inputs++;
       if (logic_gate(*input.conn.g) == 1) {
-        printf("Gate %s on\n", input.conn.g.name);
-        for (i = 0; i < input.conn.g.connections.num_outputs; i++) {
-          run(input.conn.g.connections.connectors[i]);
+        printf("Gate %s on\n", input.conn.g->name);
+        for (i = 0; i < input.conn.g->connections.num_outputs; i++) {
+          run(input.conn.g->connections.connectors[i]);
         }
       }
       break;
     case CONNECTOR_TYPE_OUTPUT:
-      printf("Output %s on\n", input.conn.o.name);
-      for (i = 0; i < input.conn.o.connections.num_outputs; i++) {
-        run(input.conn.o.connections.connectors[i]);
+      printf("Output %s on\n", input.conn.o->name);
+      for (i = 0; i < input.conn.o->connections.num_outputs; i++) {
+        run(input.conn.o->connections.connectors[i]);
       }
       break;
     case CONNECTOR_TYPE_POWER:
-      for (i = 0; i < input.conn.p.connections.num_outputs; i++) {
-        run(input.conn.p.connections.connectors[i]);
+      for (i = 0; i < input.conn.p->connections.num_outputs; i++) {
+        run(input.conn.p->connections.connectors[i]);
       }
       break;
     case CONNECTOR_TYPE_SWITCH:
-      if (input.s.value == 1) {
-        for (i = 0; i < input.conn.s.connections.num_outputs; i++) {
-          run(input.conn.s.connections.connectors[i]);
+      if (input.conn.s->value == 1) {
+        for (i = 0; i < input.conn.s->connections.num_outputs; i++) {
+          run(input.conn.s->connections.connectors[i]);
         }
       }
       break;
@@ -135,14 +135,15 @@ int main(void) {
   strcpy(switc.name, "Switch");
   strcpy(test.name, "Output");
   input.connections.connectors[0].type = CONNECTOR_TYPE_SWITCH;
-  input.connections.connectors[0].conn.s = switc;
+  input.connections.connectors[0].conn.s = &switc;
   switc.connections.connectors[0].type = CONNECTOR_TYPE_OUTPUT;
-  switc.connections.connectors[0].conn.o = test;
-  printf("%s\n", switc.connections.connectors[0].conn.o.name);
+  switc.connections.connectors[0].conn.o = &test;
+  printf("%s\n", switc.connections.connectors[0].conn.o->name);
   switc.connections.num_outputs = 1;
   input.connections.num_outputs = 1;
-  Connector tes;
+  struct Connector tes;
   tes.type = CONNECTOR_TYPE_POWER;
   tes.conn.p = &input;
+  run(tes);
   return 1;
 }
