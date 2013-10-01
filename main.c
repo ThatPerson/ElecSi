@@ -40,6 +40,7 @@ struct Gate {
   int inputs; // Changes depending on forward current. Ie, if you have below set to 'AND', it will only pass if inputs = 2;
   int gate_type; //use a GATE_TYPE
   char name[400];
+  int check;
 };
 
 struct Output {
@@ -81,7 +82,7 @@ int logic_gate(struct Gate gate) {
       }
       break;
     case GATE_TYPE_XOR: 
-      if (gate.inputs == 1) {
+      if (gate.inputs == 1 && gate.inputs != gate.check) {
         return 1;
       }
       break;
@@ -89,38 +90,42 @@ int logic_gate(struct Gate gate) {
   return 0;
 }
 
-int run(struct Connector input);
+int run(struct Connector input, int pow);
 
-int run(struct Connector input) {
-  int i;
+int run(struct Connector input, int pow) {
+  int i, val = 0;
+  struct Connection * conn;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
-      input.conn.g->inputs++;
-      if (logic_gate(*input.conn.g) == 1) {
-        printf("Gate %s on\n", input.conn.g->name);
-        for (i = 0; i < input.conn.g->connections.num_outputs; i++) {
-          run(input.conn.g->connections.connectors[i]);
-        }
-      }
+      input.conn.g->inputs += pow;
+      input.conn.g->check ++;
+      conn = &input.conn.g->connections;
+//       printf("%d - %d\n", logic_gate(*input.conn.g), input.conn.g->inputs);
+//       if (logic_gate(*input.conn.g) == 1) {
+//         val = pow;
+//       }
+      val = logic_gate(*input.conn.g);
       break;
     case CONNECTOR_TYPE_OUTPUT:
-      input.conn.o->value = 1;
-      for (i = 0; i < input.conn.o->connections.num_outputs; i++) {
-        run(input.conn.o->connections.connectors[i]);
+      if (input.conn.o->value == 0) {
+        input.conn.o->value = pow;
       }
+      conn = &input.conn.o->connections;
+      val = pow;
       break;
     case CONNECTOR_TYPE_POWER:
-      for (i = 0; i < input.conn.p->connections.num_outputs; i++) {
-        run(input.conn.p->connections.connectors[i]);
-      }
+      conn = &input.conn.p->connections;
+      val = pow;
       break;
     case CONNECTOR_TYPE_SWITCH:
       if (input.conn.s->value == 1) {
-        for (i = 0; i < input.conn.s->connections.num_outputs; i++) {
-          run(input.conn.s->connections.connectors[i]);
-        }
+        conn = &input.conn.s->connections;
+        val = pow;
       }
       break;
+  }
+  for (i = 0; i < conn->num_outputs; i++) {
+    run(conn->connectors[i], val);
   }
   return 0;
  
@@ -131,6 +136,8 @@ int main(void) {
   struct Switch switc;
   struct Output test;
   struct Switch lio;
+  struct Gate g;
+  g.gate_type = GATE_TYPE_XOR;
   input.on = 1;
   switc.value = 1;
   strcpy(switc.name, "Switch");
@@ -139,22 +146,27 @@ int main(void) {
   input.connections.connectors[0].conn.s = &switc;
   input.connections.connectors[1].type = CONNECTOR_TYPE_SWITCH;
   input.connections.connectors[1].conn.s = &lio;
-  switc.connections.connectors[0].type = CONNECTOR_TYPE_OUTPUT;
-  switc.connections.connectors[0].conn.o = &test;
-  lio.connections.connectors[0].type = CONNECTOR_TYPE_OUTPUT;
-  lio.connections.connectors[0].conn.o = &test;
+  switc.connections.connectors[0].type = CONNECTOR_TYPE_GATE;
+  switc.connections.connectors[0].conn.g = &g;
+  lio.connections.connectors[0].type = CONNECTOR_TYPE_GATE;
+  lio.connections.connectors[0].conn.g = &g;
+  g.connections.connectors[0].type = CONNECTOR_TYPE_OUTPUT;
+  g.connections.connectors[0].conn.o = &test;
   printf("%s\n", switc.connections.connectors[0].conn.o->name);
   switc.connections.num_outputs = 1;
   input.connections.num_outputs = 2;
   lio.connections.num_outputs = 1;
+  g.connections.num_outputs = 1;
   struct Connector tes;
   tes.type = CONNECTOR_TYPE_POWER;
   tes.conn.p = &input;
-  run(tes);
+  run(tes, 1);
   char input_c[500];
   while (strcmp(input_c, "exit") != 0) {
+    g.check = 0;
     printf("> ");
     scanf("%499s", input_c);
+    g.inputs = 0;
     if (strcmp(input_c, "on1") == 0) {
       switc.value = 1;
     } else if (strcmp(input_c, "off1") == 0) {
@@ -165,7 +177,7 @@ int main(void) {
       lio.value = 0;
     }
     test.value = 0;
-    run(tes);
+    run(tes, 1);
     if (test.value == 1) {
       printf("OUTPUT on\n");
     }
