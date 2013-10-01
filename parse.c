@@ -1,0 +1,140 @@
+char * substr(char * orig, int start, int length) {
+        char * ret = (char *)malloc (sizeof (char) * length);
+        strncpy (ret, orig+start, length);
+        ret[length] = '\0';
+        return ret;
+}
+
+int intlength(int l) {
+        if (l != 0) {
+                return floor(log10(abs(l))) + 1;
+        }
+        return -1;
+}
+
+struct Connection * find_connection(char * name, struct Test * r) {
+  int i;
+  struct Connection * ret;
+  for (i = 0; i < r->num_output; i++) {
+    if (strcmp(r->o[i].name, name) == 0) {
+      ret = &r->o[i].connections;
+    }
+  }
+  for (i = 0; i < r->num_power; i++){
+    if (strcmp(r->p[i].name, name) == 0) {
+      ret = &r->p[i].connections;
+    }
+  }
+  for (i = 0; i < r->num_switch; i++){
+    if (strcmp(r->s[i].name, name) == 0) {
+      ret = &r->s[i].connections;
+    }
+  }
+  for (i = 0; i < r->num_gate; i++){
+    if (strcmp(r->g[i].name, name) == 0) {
+      ret = &r->g[i].connections;
+    }
+  }
+
+  return ret;
+}
+
+struct Connector * find_connector(char * name, struct Test * r) {
+  int i;
+  struct Connector * ret;
+  for (i = 0; i < r->num_output; i++) {
+    if (strcmp(r->o[i].name, name) == 0) {
+      ret->conn.o = &r->o[i];
+      ret->type = CONNECTOR_TYPE_OUTPUT;
+    }
+  }
+  for (i = 0; i < r->num_power; i++){
+    if (strcmp(r->p[i].name, name) == 0) {
+      ret->conn.p = &r->p[i];
+      ret->type = CONNECTOR_TYPE_POWER;
+    }
+  }
+  for (i = 0; i < r->num_switch; i++){
+    if (strcmp(r->s[i].name, name) == 0) {
+      ret->conn.s = &r->s[i];
+      ret->type = CONNECTOR_TYPE_SWITCH;
+    }
+  }
+  for (i = 0; i < r->num_gate; i++){
+    if (strcmp(r->g[i].name, name) == 0) {
+      ret->conn.g = &r->g[i];
+      ret->type = CONNECTOR_TYPE_GATE;
+    }
+  }
+
+  return ret;
+}
+
+struct Test get_config(char filename[]) {
+        struct Test r;
+        FILE * file = fopen(filename, "r");
+        r.num_gate = 0;
+        r.num_output = 0;
+        r.num_power = 0;
+        r.num_switch = 0;
+        if (file != NULL) {
+                char line[128];
+                while (fgets(line, sizeof(line), file) != NULL) {
+                        switch (line[0]) {
+                          case 'G':
+                            switch (line[1]) {
+                              case 'A':
+                                r.g[r.num_gate].gate_type = GATE_TYPE_AND;
+                              case 'X':
+                                r.g[r.num_gate].gate_type = GATE_TYPE_XOR;
+                              case 'O':
+                                r.g[r.num_gate].gate_type = GATE_TYPE_OR;
+                              default:
+                                printf("There may be a error in your sim file.");
+                                exit(0);
+                            }
+                            strcpy(r.g[r.num_gate].name, substr(line, 3, 100));
+                            r.num_gate++;
+                            break;
+                          case 'S':
+                            r.s[r.num_switch].value = 0;
+                            strcpy(r.s[r.num_switch].name, substr(line, 2, 100));
+                            r.num_switch++;
+                            break;
+                          case 'O':
+                            strcpy(r.o[r.num_output].name, substr(line, 2, 100));
+                            r.num_output++;
+                            break;
+                          case 'P':
+                            strcpy(r.p[r.num_power].name, substr(line, 2, 100));
+                            r.num_power++;
+                            break;
+                          case 'L':
+                            if (line[1] == 'N') {
+                              if (line[2] == 'K') {
+                                int i, found = 0;
+                                struct Connection * out;
+                                struct Connector * in;
+                                for (i = 4; i < 100; i++) {
+                                  if (line[i] == ' ') {
+                                    found = 1;
+                                    out = find_connection(substr(line, 4, i-4), &r);
+                                    in = find_connector(substr(line, i-4, 100), &r);
+                                    break;
+                                  }
+                                }
+                                if (found == 1) {
+                                  out->connectors[out->num_outputs] = *in;
+                                  out->num_outputs++;
+                                }
+                              }
+                            }
+                        }
+                  //fputs(line, stdout);
+                }
+                fclose(file);
+        } else {
+                perror(filename);
+        }
+        return r;
+}

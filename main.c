@@ -19,6 +19,8 @@ struct Output;
 struct Switch;
 struct Power;
 
+
+
 struct Connector {
   int type;
   union types {
@@ -57,9 +59,22 @@ struct Switch {
 
 struct Power {
   int on;
+  char name[400];
   struct Connection connections;
 };
 
+struct Test {
+  struct Power p[5];
+  struct Gate g[50];
+  struct Output o[512];
+  struct Switch s[50];
+  int num_power;
+  int num_gate;
+  int num_output;
+  int num_switch;
+};
+
+#include "parse.c"
 
 /*
  * Do not dwell on the past. It is not changable.
