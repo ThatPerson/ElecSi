@@ -39,9 +39,10 @@ struct Connection * find_connection(char * name, struct Test * r) {
   return ret;
 }
 
-struct Connector * find_connector(char * name, struct Test * r) {
+struct Connector * find_connector(char name[], struct Test * r) {
   int i;
   struct Connector * ret;
+  ret->type = -1;
   for (i = 0; i < r->num_output; i++) {
     if (strcmp(r->o[i].name, name) == 0) {
       ret->conn.o = &r->o[i];
@@ -84,29 +85,31 @@ struct Test get_config(char filename[]) {
                           case 'G':
                             switch (line[1]) {
                               case 'A':
-                                r.g[r.num_gate].gate_type = GATE_TYPE_AND;
+                                r.g[r.num_gate].gate_type = GATE_TYPE_AND; break;
                               case 'X':
-                                r.g[r.num_gate].gate_type = GATE_TYPE_XOR;
+                                r.g[r.num_gate].gate_type = GATE_TYPE_XOR; break;
                               case 'O':
-                                r.g[r.num_gate].gate_type = GATE_TYPE_OR;
+                                r.g[r.num_gate].gate_type = GATE_TYPE_OR; break;
                               default:
                                 printf("There may be a error in your sim file.");
                                 exit(0);
                             }
-                            strcpy(r.g[r.num_gate].name, substr(line, 3, 100));
+                            strcpy(r.g[r.num_gate].name, substr(line, 3, strlen(line)-4));
                             r.num_gate++;
                             break;
                           case 'S':
                             r.s[r.num_switch].value = 0;
-                            strcpy(r.s[r.num_switch].name, substr(line, 2, 100));
+                            strcpy(r.s[r.num_switch].name, substr(line, 2, strlen(line)-3));
                             r.num_switch++;
                             break;
                           case 'O':
-                            strcpy(r.o[r.num_output].name, substr(line, 2, 100));
+                            strcpy(r.o[r.num_output].name, substr(line, 2, strlen(line)-3));
+                            r.o[r.num_output].value = 0;
                             r.num_output++;
+                            
                             break;
                           case 'P':
-                            strcpy(r.p[r.num_power].name, substr(line, 2, 100));
+                            strcpy(r.p[r.num_power].name, substr(line, 2, strlen(line)-3));
                             r.num_power++;
                             break;
                           case 'L':
@@ -115,11 +118,13 @@ struct Test get_config(char filename[]) {
                                 int i, found = 0;
                                 struct Connection * out;
                                 struct Connector * in;
-                                for (i = 4; i < 100; i++) {
+                                for (i = 4; i < strlen(line); i++) {
                                   if (line[i] == ' ') {
                                     found = 1;
                                     out = find_connection(substr(line, 4, i-4), &r);
-                                    in = find_connector(substr(line, i-4, 100), &r);
+                                    printf("OUT: %d %s\n", out->num_outputs, substr(line, 4, i-4));
+                                    in = find_connector(substr(line, i+1, strlen(line)-(i)), &r);
+                                    printf("IN: %d %s\n", in->type, substr(line, i+1, strlen(line)-(i)));
                                     break;
                                   }
                                 }
@@ -129,6 +134,7 @@ struct Test get_config(char filename[]) {
                                 }
                               }
                             }
+                            break;
                         }
                   //fputs(line, stdout);
                 }
