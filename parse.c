@@ -121,10 +121,19 @@ struct Test get_config(char filename[]) {
                                 for (i = 4; i < strlen(line); i++) {
                                   if (line[i] == ' ') {
                                     found = 1;
-                                    out = find_connection(substr(line, 4, i-4), &r);
-                                    printf("OUT: %d %s\n", out->num_outputs, substr(line, 4, i-4));
-                                    in = find_connector(substr(line, i+1, strlen(line)-(i)), &r);
-                                    printf("IN: %d %s\n", in->type, substr(line, i+1, strlen(line)-(i)));
+                                    char * goingout;
+                                    char * goingin;
+                                    goingout = (char *) malloc(i-4 * sizeof(char));
+                                    goingin = (char *) malloc((strlen(line) - i) * sizeof(char));
+                                    strcpy(goingout, substr(line, 4, i-4));
+                                    strcpy(goingin, substr(line, i+1, strlen(line)-(i)-2));
+                                    out = find_connection(goingout, &r);
+                                    //printf("OUT: %d %s\n", out->num_outputs, goingout);
+                                    in = find_connector(goingin, &r);
+                                    //printf("IN: %d %s\n", in->type, goingin);
+                                    
+                                    free(goingin);
+                                    free(goingout);
                                     break;
                                   }
                                 }

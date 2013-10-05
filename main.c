@@ -110,7 +110,6 @@ int run(struct Connector input, int pow);
 int run(struct Connector input, int pow) {
   int i, val = 0;
   struct Connection * conn;
-  printf("%d J\n", input.type);
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
       printf("GATE");
@@ -124,8 +123,6 @@ int run(struct Connector input, int pow) {
       val = logic_gate(*input.conn.g);
       break;
     case CONNECTOR_TYPE_OUTPUT:
-      printf("OUTPUT");
-      printf("%d\n", &(input.conn.o->value));
 
       if (input.conn.o->value == 0) {
         input.conn.o->value = pow;
@@ -147,7 +144,6 @@ int run(struct Connector input, int pow) {
       break;
     default: printf("No connector"); break;
   }
-  printf("%d\n", conn->num_outputs);
 
   for (i = 0; i < conn->num_outputs; i++) {
     run(conn->connectors[i], val);
@@ -157,7 +153,6 @@ int run(struct Connector input, int pow) {
 }
 
 int main(void) {
-  printf("HELLO");
   char argv[4][400];
   strcpy(argv[1], "test.sim");
   printf("HEllo");
@@ -170,6 +165,12 @@ int main(void) {
   c.type = CONNECTOR_TYPE_POWER;
   c.conn.p = &t.p[0];
   run(c, 1);
+  char input_c[500];
+  
+  while (strcmp(input_c, "exit") != 0){
+  
+  }
+  
   /*char input_c[500];
   while (strcmp(input_c, "exit") != 0) {
     g.check = 0;
