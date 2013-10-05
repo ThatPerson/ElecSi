@@ -165,10 +165,42 @@ int main(void) {
   c.type = CONNECTOR_TYPE_POWER;
   c.conn.p = &t.p[0];
   run(c, 1);
+  if (t.o[0].value == 1) {
+    printf("OTU");
+  }
   char input_c[500];
-  
+  int lq = 0;
   while (strcmp(input_c, "exit") != 0){
-  
+    for (lq = 0; lq < t.num_gate; lq++) {
+      t.g[lq].check = 0;
+      t.g[lq].inputs = 0;
+    }
+    for (lq = 0; lq < t.num_output; lq++) {
+      t.o[lq].value = 0;
+    }
+    printf("> ");
+    scanf("%499s", input_c);
+    if (strcmp(substr(input_c, 0, 2), "on") == 0) {
+      // We want to turn a switch on
+      for (lq = 0; lq < t.num_switch; lq++) {
+        if (strcmp(
+          t.s[lq].name, 
+          substr(
+            input_c, 
+            3, 
+            strlen(input_c)-1
+          )
+        )) {
+          t.s[lq].value = 1;
+        }
+      }
+    }
+    run(c, 1);
+    for (lq = 0; lq < t.num_output; lq++) {
+      if (t.o[lq].value == 1) {
+        printf("output %s on", t.o[lq].name);
+      }
+    }
   }
   
   /*char input_c[500];

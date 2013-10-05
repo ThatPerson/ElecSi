@@ -132,6 +132,15 @@ struct Test get_config(char filename[]) {
                                     in = find_connector(goingin, &r);
                                     //printf("IN: %d %s\n", in->type, goingin);
                                     
+                                    int ll;
+                                    for (ll = 0; ll < strlen(goingout); ll++) {
+                                      printf("%d: %d (%c)\n", ll, goingout[ll], goingout[ll]);
+                                    }
+                                    printf("\n");
+                                    for (ll = 0; ll < strlen(goingin); ll++) {
+                                      printf("%d: %d (%c)\n", ll, goingin[ll], goingin[ll]);
+                                    }
+                                    
                                     free(goingin);
                                     free(goingout);
                                     break;

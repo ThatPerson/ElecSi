@@ -1,0 +1,11 @@
+GX xorgate
+GA andgate
+GO orgate
+
+S switch
+
+O output
+P power
+
+LNK power switch
+LNK switch output
