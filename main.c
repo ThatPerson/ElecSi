@@ -123,7 +123,7 @@ int run(struct Connector input, int pow) {
       val = logic_gate(*input.conn.g);
       break;
     case CONNECTOR_TYPE_OUTPUT:
-
+      printf("V%d\n", input.conn.o->value);
       if (input.conn.o->value == 0) {
         input.conn.o->value = pow;
       }
@@ -136,15 +136,16 @@ int run(struct Connector input, int pow) {
       val = pow;
       break;
     case CONNECTOR_TYPE_SWITCH:
-      printf("SWITCH");
+      printf("SWITCH %d - %d %s\n", input.conn.s->value, &(input.conn.s), input.conn.s->name);
       if (input.conn.s->value == 1) {
-        conn = &input.conn.s->connections;
         val = pow;
       }
+      conn = &input.conn.s->connections;
+
       break;
     default: printf("No connector"); break;
   }
-
+  printf("%d\n", &(conn->num_outputs));
   for (i = 0; i < conn->num_outputs; i++) {
     run(conn->connectors[i], val);
   }
@@ -168,7 +169,7 @@ int main(void) {
   if (t.o[0].value == 1) {
     printf("OTU");
   }
-  char input_c[500];
+  char input_c[500], comp[500];
   int lq = 0;
   while (strcmp(input_c, "exit") != 0){
     for (lq = 0; lq < t.num_gate; lq++) {
@@ -179,19 +180,18 @@ int main(void) {
       t.o[lq].value = 0;
     }
     printf("> ");
-    scanf("%499s", input_c);
-    if (strcmp(substr(input_c, 0, 2), "on") == 0) {
+    
+    scanf("%499s %499s", input_c, comp);
+    if (strcmp(input_c, "on") == 0) {
       // We want to turn a switch on
+
+      printf("%s", comp);
       for (lq = 0; lq < t.num_switch; lq++) {
-        if (strcmp(
-          t.s[lq].name, 
-          substr(
-            input_c, 
-            3, 
-            strlen(input_c)-1
-          )
-        )) {
+        if (strcmp(t.s[lq].name, comp) == 0) {
+          printf("HELLdfdO");
           t.s[lq].value = 1;
+          
+          printf("%d - %d %s\n", t.s[lq].value, &(t.s[lq]), t.s[lq].name);
         }
       }
     }

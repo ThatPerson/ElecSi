@@ -18,6 +18,7 @@ struct Connection * find_connection(char * name, struct Test * r) {
   for (i = 0; i < r->num_output; i++) {
     if (strcmp(r->o[i].name, name) == 0) {
       ret = &r->o[i].connections;
+     
     }
   }
   for (i = 0; i < r->num_power; i++){
@@ -35,39 +36,38 @@ struct Connection * find_connection(char * name, struct Test * r) {
       ret = &r->g[i].connections;
     }
   }
-
   return ret;
 }
 
-struct Connector * find_connector(char name[], struct Test * r) {
+struct Connector find_connector(char name[], struct Test * r) {
   int i;
-  struct Connector * ret;
-  ret->type = -1;
+  struct Connector ret;
+  ret.type = -1;
   for (i = 0; i < r->num_output; i++) {
     if (strcmp(r->o[i].name, name) == 0) {
-      ret->conn.o = &r->o[i];
-      ret->type = CONNECTOR_TYPE_OUTPUT;
+      ret.conn.o = &r->o[i];
+      ret.type = CONNECTOR_TYPE_OUTPUT;
     }
   }
   for (i = 0; i < r->num_power; i++){
     if (strcmp(r->p[i].name, name) == 0) {
-      ret->conn.p = &r->p[i];
-      ret->type = CONNECTOR_TYPE_POWER;
+      ret.conn.p = &r->p[i];
+      ret.type = CONNECTOR_TYPE_POWER;
     }
   }
   for (i = 0; i < r->num_switch; i++){
     if (strcmp(r->s[i].name, name) == 0) {
-      ret->conn.s = &r->s[i];
-      ret->type = CONNECTOR_TYPE_SWITCH;
+      ret.conn.s = &r->s[i];
+      ret.type = CONNECTOR_TYPE_SWITCH;
     }
   }
   for (i = 0; i < r->num_gate; i++){
     if (strcmp(r->g[i].name, name) == 0) {
-      ret->conn.g = &r->g[i];
-      ret->type = CONNECTOR_TYPE_GATE;
+      ret.conn.g = &r->g[i];
+      ret.type = CONNECTOR_TYPE_GATE;
     }
   }
-
+  printf("%d\n", ret.type);
   return ret;
 }
 
@@ -95,21 +95,27 @@ struct Test get_config(char filename[]) {
                                 exit(0);
                             }
                             strcpy(r.g[r.num_gate].name, substr(line, 3, strlen(line)-4));
+                            r.g[r.num_switch].connections.num_outputs = 0;
+
                             r.num_gate++;
                             break;
                           case 'S':
                             r.s[r.num_switch].value = 0;
+                            r.s[r.num_switch].connections.num_outputs = 0;
                             strcpy(r.s[r.num_switch].name, substr(line, 2, strlen(line)-3));
                             r.num_switch++;
                             break;
                           case 'O':
                             strcpy(r.o[r.num_output].name, substr(line, 2, strlen(line)-3));
                             r.o[r.num_output].value = 0;
+                            r.o[r.num_switch].connections.num_outputs = 0;
                             r.num_output++;
                             
                             break;
                           case 'P':
                             strcpy(r.p[r.num_power].name, substr(line, 2, strlen(line)-3));
+                            r.p[r.num_switch].connections.num_outputs = 0;
+
                             r.num_power++;
                             break;
                           case 'L':
@@ -117,7 +123,7 @@ struct Test get_config(char filename[]) {
                               if (line[2] == 'K') {
                                 int i, found = 0;
                                 struct Connection * out;
-                                struct Connector * in;
+                                struct Connector in;
                                 for (i = 4; i < strlen(line); i++) {
                                   if (line[i] == ' ') {
                                     found = 1;
@@ -147,8 +153,9 @@ struct Test get_config(char filename[]) {
                                   }
                                 }
                                 if (found == 1) {
-                                  out->connectors[out->num_outputs] = *in;
+                                  out->connectors[out->num_outputs] = in;
                                   out->num_outputs++;
+                                  printf("%d\n", &(out->num_outputs));
                                 }
                               }
                             }
