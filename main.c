@@ -164,7 +164,8 @@ int main(void) {
   
   t = get_config(argv[1]);
   c.type = CONNECTOR_TYPE_POWER;
-  c.conn.p = &t.p[0];
+  c.conn.p = &(t).p[0];
+  printf("%d %d %%\n", &(c.conn.p), &(t.p[0]));
   run(c, 1);
   if (t.o[0].value == 1) {
     printf("OTU");
@@ -195,6 +196,8 @@ int main(void) {
         }
       }
     }
+    t.s[0].value = 1;
+    
     run(c, 1);
     for (lq = 0; lq < t.num_output; lq++) {
       if (t.o[lq].value == 1) {

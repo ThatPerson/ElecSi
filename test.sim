@@ -1,11 +1,8 @@
-GX xorgate
-GA andgate
-GO orgate
-
-S switch
+S swit
 
 O output
 P power
 
-LNK power switch
-LNK switch output
+LNK power swit
+LNK swit output
+
