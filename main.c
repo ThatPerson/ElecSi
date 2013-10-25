@@ -81,7 +81,7 @@ struct Test {
  * Do not dwell on the future. It is incontrolable.
  * Dwell on the current, the present. What you do 
  * now can revoke the mistakes of the past, and 
- * allow you to see the future.
+ * allow you to change the future.
  */
 
 int logic_gate(struct Gate gate) {
