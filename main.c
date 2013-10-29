@@ -19,8 +19,6 @@ struct Output;
 struct Switch;
 struct Power;
 
-
-
 struct Connector {
   int type;
   union types {
@@ -59,22 +57,9 @@ struct Switch {
 
 struct Power {
   int on;
-  char name[400];
   struct Connection connections;
 };
 
-struct Test {
-  struct Power p[5];
-  struct Gate g[5];
-  struct Output o[5];
-  struct Switch s[5];
-  int num_power;
-  int num_gate;
-  int num_output;
-  int num_switch;
-};
-
-#include "parse.c"
 
 /*
  * Do not dwell on the past. It is not changable.
@@ -112,7 +97,6 @@ int run(struct Connector input, int pow) {
   struct Connection * conn;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
-      printf("GATE");
       input.conn.g->inputs += pow;
       input.conn.g->check ++;
       conn = &input.conn.g->connections;
@@ -123,7 +107,6 @@ int run(struct Connector input, int pow) {
       val = logic_gate(*input.conn.g);
       break;
     case CONNECTOR_TYPE_OUTPUT:
-      printf("V%d\n", input.conn.o->value);
       if (input.conn.o->value == 0) {
         input.conn.o->value = pow;
       }
@@ -131,21 +114,16 @@ int run(struct Connector input, int pow) {
       val = pow;
       break;
     case CONNECTOR_TYPE_POWER:
-      printf("POWER");
       conn = &input.conn.p->connections;
       val = pow;
       break;
     case CONNECTOR_TYPE_SWITCH:
-      printf("SWITCH %d - %d %s\n", input.conn.s->value, &(input.conn.s), input.conn.s->name);
       if (input.conn.s->value == 1) {
+        conn = &input.conn.s->connections;
         val = pow;
       }
-      conn = &input.conn.s->connections;
-
       break;
-    default: printf("No connector"); break;
   }
-  printf("%d\n", &(conn->num_outputs));
   for (i = 0; i < conn->num_outputs; i++) {
     run(conn->connectors[i], val);
   }
@@ -154,59 +132,36 @@ int run(struct Connector input, int pow) {
 }
 
 int main(void) {
-  char argv[4][400];
-  strcpy(argv[1], "test.sim");
-  printf("HEllo");
-  struct Test t;
-  struct Connector c;
-  printf("Hello\n");
-  printf("%s\n", argv[1]);
-  
-  t = get_config(argv[1]);
-  c.type = CONNECTOR_TYPE_POWER;
-  c.conn.p = &(t).p[0];
-  printf("%d %d %%\n", &(c.conn.p), &(t.p[0]));
-  run(c, 1);
-  if (t.o[0].value == 1) {
-    printf("OTU");
-  }
-  char input_c[500], comp[500];
-  int lq = 0;
-  while (strcmp(input_c, "exit") != 0){
-    for (lq = 0; lq < t.num_gate; lq++) {
-      t.g[lq].check = 0;
-      t.g[lq].inputs = 0;
-    }
-    for (lq = 0; lq < t.num_output; lq++) {
-      t.o[lq].value = 0;
-    }
-    printf("> ");
-    
-    scanf("%499s %499s", input_c, comp);
-    if (strcmp(input_c, "on") == 0) {
-      // We want to turn a switch on
-
-      printf("%s", comp);
-      for (lq = 0; lq < t.num_switch; lq++) {
-        if (strcmp(t.s[lq].name, comp) == 0) {
-          printf("HELLdfdO");
-          t.s[lq].value = 1;
-          
-          printf("%d - %d %s\n", t.s[lq].value, &(t.s[lq]), t.s[lq].name);
-        }
-      }
-    }
-    t.s[0].value = 1;
-    
-    run(c, 1);
-    for (lq = 0; lq < t.num_output; lq++) {
-      if (t.o[lq].value == 1) {
-        printf("output %s on", t.o[lq].name);
-      }
-    }
-  }
-  
-  /*char input_c[500];
+  struct Power input;
+  struct Switch switc;
+  struct Output test;
+  struct Switch lio;
+  struct Gate g;
+  g.gate_type = GATE_TYPE_XOR;
+  input.on = 1;
+  switc.value = 1;
+  strcpy(switc.name, "Switch");
+  strcpy(test.name, "Output");
+  input.connections.connectors[0].type = CONNECTOR_TYPE_SWITCH;
+  input.connections.connectors[0].conn.s = &switc;
+  input.connections.connectors[1].type = CONNECTOR_TYPE_SWITCH;
+  input.connections.connectors[1].conn.s = &lio;
+  switc.connections.connectors[0].type = CONNECTOR_TYPE_GATE;
+  switc.connections.connectors[0].conn.g = &g;
+  lio.connections.connectors[0].type = CONNECTOR_TYPE_GATE;
+  lio.connections.connectors[0].conn.g = &g;
+  g.connections.connectors[0].type = CONNECTOR_TYPE_OUTPUT;
+  g.connections.connectors[0].conn.o = &test;
+  printf("%s\n", switc.connections.connectors[0].conn.o->name);
+  switc.connections.num_outputs = 1;
+  input.connections.num_outputs = 2;
+  lio.connections.num_outputs = 1;
+  g.connections.num_outputs = 1;
+  struct Connector tes;
+  tes.type = CONNECTOR_TYPE_POWER;
+  tes.conn.p = &input;
+  run(tes, 1);
+  char input_c[500];
   while (strcmp(input_c, "exit") != 0) {
     g.check = 0;
     printf("> ");
@@ -227,6 +182,6 @@ int main(void) {
       printf("OUTPUT on\n");
     }
     
-  }*/
+  }
   return 1;
 }
