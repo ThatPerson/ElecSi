@@ -141,6 +141,7 @@ int main(void) {
   input.on = 1;
   switc.value = 1;
   strcpy(switc.name, "Switch");
+  strcpy(lio.name, "Lio");
   strcpy(test.name, "Output");
   input.connections.connectors[0].type = CONNECTOR_TYPE_SWITCH;
   input.connections.connectors[0].conn.s = &switc;
@@ -160,22 +161,30 @@ int main(void) {
   struct Connector tes;
   tes.type = CONNECTOR_TYPE_POWER;
   tes.conn.p = &input;
+  
+  struct Switch * switches[500];
+  switches[0] = &switc;
+  switches[1] = &lio;
+  int i, num_switches = 2;
+  
   run(tes, 1);
-  char input_c[500];
+  char input_c[500], comp[500];
   while (strcmp(input_c, "exit") != 0) {
     g.check = 0;
     printf("> ");
-    scanf("%499s", input_c);
+    scanf("%499s %499s", input_c, comp);
     g.inputs = 0;
-    if (strcmp(input_c, "on1") == 0) {
-      switc.value = 1;
-    } else if (strcmp(input_c, "off1") == 0) {
-      switc.value = 0;
-    } else if (strcmp(input_c, "on2") == 0) {
-      lio.value = 1;
-    } else if (strcmp(input_c, "off2") == 0) {
-      lio.value = 0;
-    }
+    
+    for (i = 0; i < num_switches; i++) {
+		if (strcmp(switches[i]->name, input_c) == 0) {
+			if (strcmp(comp, "on") == 0) {
+				switches[i]->value = 1;
+			} else {
+				switches[i]->value = 0;
+			}
+		}
+	}
+
     test.value = 0;
     run(tes, 1);
     if (test.value == 1) {
