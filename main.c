@@ -96,7 +96,7 @@ int logic_gate(struct Gate gate) {
       }
       break;
     case GATE_TYPE_XOR: 
-      if (gate.inputs == 1 && gate.inputs != gate.check) {
+      if (gate.check > 1 && gate.inputs != gate.check) {
         return 1;
       }
       break;
@@ -118,11 +118,14 @@ int run(struct Connector input, int pow) {
   int set = 0;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
-      printf("G TYPE\n");
+      printf("G TYPE %d\n", pow);
 
 
       input.conn.g->inputs += pow;
       input.conn.g->check ++;
+
+      printf("OUTPUTS OF GATE %d %d\n", input.conn.g->inputs, input.conn.g->check);
+
       conn = &(input.conn.g->connections);
 //       printf("%d - %d\n", logic_gate(*input.conn.g), input.conn.g->inputs);
 //       if (logic_gate(*input.conn.g) == 1) {
@@ -151,12 +154,14 @@ int run(struct Connector input, int pow) {
       break;
     case CONNECTOR_TYPE_SWITCH:
       printf("S TYPE");
+      val = 0;
       if (input.conn.s->value == 1) {
         set = 1;
-        conn = &(input.conn.s->connections);
+        
         val = pow;
       }
-      //set = 1;
+      conn = &(input.conn.s->connections);
+      set = 1;
       break;
     default:
       printf("NO TYPE\n");
@@ -176,10 +181,7 @@ int run(struct Connector input, int pow) {
  
 }
 
-int copy_input(struct Input * a, struct Input * b) {
-  int i;
 
-}
 
 int main(void) {
   get_config();
@@ -194,9 +196,16 @@ int main(void) {
   char input_c[500], comp[500];
   while (strcmp(input_c, "exit") != 0) {
     //g.check = 0;
-    
+        printf("> ");
+    scanf("%499s", input_c);
     //g.inputs = 0;
     scanf("%499s", comp);
+
+    for (i = 0; i < lo.num_gates; i++) {
+      lo.gates[i].check = 0;
+      lo.gates[i].inputs = 0;
+    }
+    lo.switches[0].value = 1;
     for (i = 0; i < lo.num_switches; i++) {
 		  if (strcmp(lo.switches[i].name, input_c) == 0) {
         printf("MATCH\n");
@@ -220,8 +229,7 @@ int main(void) {
         printf("Output %s on\n", lo.outputs[i].name);
       }
     }
-    printf("> ");
-    scanf("%499s", input_c);
+
   }
   return 1;
 }
