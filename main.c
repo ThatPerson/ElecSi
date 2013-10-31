@@ -96,7 +96,7 @@ int logic_gate(struct Gate gate) {
       }
       break;
     case GATE_TYPE_XOR: 
-      if (gate.check > 1 && gate.inputs != gate.check) {
+      if (gate.check > 1 && gate.inputs != gate.check && gate.inputs > 0) {
         return 1;
       }
       break;
@@ -112,19 +112,13 @@ int run(struct Connector input, int pow) {
   time = time + 1;
   int i, val = 0;
   struct Connection * conn;
-  printf("TIME %d\n", time);
-  printf("SFUNC %x\n", input.type);
-  printf("HI");
   int set = 0;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
-      printf("G TYPE %d\n", pow);
 
 
       input.conn.g->inputs += pow;
       input.conn.g->check ++;
-
-      printf("OUTPUTS OF GATE %d %d\n", input.conn.g->inputs, input.conn.g->check);
 
       conn = &(input.conn.g->connections);
 //       printf("%d - %d\n", logic_gate(*input.conn.g), input.conn.g->inputs);
@@ -135,7 +129,6 @@ int run(struct Connector input, int pow) {
       set = 1;
       break;
     case CONNECTOR_TYPE_OUTPUT:
-      printf("O TYPE\n");
 
       if (input.conn.o->value == 0) {
         input.conn.o->value = pow;
@@ -145,15 +138,12 @@ int run(struct Connector input, int pow) {
       set = 1;
       break;
     case CONNECTOR_TYPE_POWER:
-      printf("P TYPE\n");
 
       conn = &(input.conn.p->connections);
-      printf("%d\n", conn->num_outputs);
       val = pow;
       set = 1;
       break;
     case CONNECTOR_TYPE_SWITCH:
-      printf("S TYPE");
       val = 0;
       if (input.conn.s->value == 1) {
         set = 1;
@@ -164,18 +154,13 @@ int run(struct Connector input, int pow) {
       set = 1;
       break;
     default:
-      printf("NO TYPE\n");
       return 1;
   }
-  printf("%d\n", set);
   if (set == 1) {
-    printf("WE HAVE %d\n", conn->num_outputs);
     for (i = 0; i < conn->num_outputs; i++) {
-      printf("RUN %d\n", conn->connectors[i].type);
       run(conn->connectors[i], val);
     }
   } else {
-    printf("NO NO NOT TODAY\n");
   }
   return 0;
  
@@ -208,10 +193,8 @@ int main(void) {
     lo.switches[0].value = 1;
     for (i = 0; i < lo.num_switches; i++) {
 		  if (strcmp(lo.switches[i].name, input_c) == 0) {
-        printf("MATCH\n");
 			  if (strcmp(comp, "on") == 0) {
 				  lo.switches[i].value = 1;
-          printf("MATCH 2\n");
 			  } else {
 			   	lo.switches[i].value = 0;
 			  }

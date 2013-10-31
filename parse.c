@@ -23,14 +23,12 @@ struct LocationObject get_connector(char name[500]) {
 	connect.type = -1;
 	int ql;
 	for (ql = 0; ql < lo.num_outputs; ql++) {
-		printf("%s =/= %s ?\n", lo.outputs[ql].name, name);
 		if (strcmp(lo.outputs[ql].name, name) == 0) {
 			connect.type = CONNECTOR_TYPE_OUTPUT;
 			connect.array_num = ql;
 		}
 	}
 	for (ql = 0; ql < lo.num_gates; ql++) {
-		printf("%s =/= %s ?\n", lo.gates[ql].name, name);
 
 		if (strcmp(lo.gates[ql].name, name) == 0) {
 			connect.type = CONNECTOR_TYPE_GATE;
@@ -38,7 +36,6 @@ struct LocationObject get_connector(char name[500]) {
 		}
 	}
 	for (ql = 0; ql < lo.num_switches; ql++) {
-		printf("%s =/= %s ?\n", lo.switches[ql].name, name);
 		if (strcmp(lo.switches[ql].name, name) == 0) {
 			connect.type = CONNECTOR_TYPE_SWITCH;
 			connect.array_num = ql;	
@@ -63,12 +60,10 @@ int get_config(void) {
 			switch (line[0]) {
 				case 'S':
 					strcpy(lo.switches[lo.num_switches].name, substr(line, 2, strlen(line)-3));
-					printf("%s (%d) ((%s) %d %d)\n", lo.switches[lo.num_switches].name, lo.num_switches, line, 2, strlen(line)-2);
 					lo.num_switches++;
 					break;
 				case 'O':
 					strcpy(lo.outputs[lo.num_outputs].name, substr(line, 2, strlen(line)-3));
-					printf("%s (%d) ((%s) %d %d)\n", lo.outputs[lo.num_switches].name, lo.num_outputs, line, 2, strlen(line)-2);
 					lo.num_outputs++;
 					break;
 				case 'G':
@@ -102,12 +97,10 @@ int get_config(void) {
 						char beg[500], end[500];
 						strcpy(beg, substr(line, 4, (mid-4)));
 						strcpy(end, substr(line, mid+1, strlen(line)-(mid+2)));
-						printf("BEG AND END /%d///%s/////%s////\n", mid, beg, end);
 						struct LocationObject ci;
 						struct LocationObject co;
 						int done = 0;
 						if (strcmp(beg, "POWER") == 0) {
-							printf("WE HAVE POWER\n");
 							ci = get_connector(end);
 							lo.powersource.connections.connectors[lo.powersource.connections.num_outputs].type = ci.type;
 							switch (ci.type) {
@@ -137,7 +130,6 @@ int get_config(void) {
 							 * r and done with. In the future, I may return and do this properly, but for now, t
 							 * his is it.
 							 */
-							printf("CONNECTOR TYPE %d (%d) // %d (%d)\n", co.type, co.array_num, ci.type, ci.array_num);
 							switch (co.type) {
 								case CONNECTOR_TYPE_SWITCH:
 									lo.switches[co.array_num].connections.connectors[lo.switches[co.array_num].connections.num_outputs].type = ci.type;
