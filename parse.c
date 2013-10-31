@@ -44,12 +44,9 @@ struct LocationObject get_connector(char name[500]) {
 	return connect;
 }
 
-int get_config(void) {
+int get_config(char filename[500]) {
 
-	char filename[500];
-	strcpy(filename, "test.sim");
-
-
+	
 	FILE * file = fopen(filename, "r");
 	if (file != NULL) {
 		char line[128];

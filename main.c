@@ -168,8 +168,12 @@ int run(struct Connector input, int pow) {
 
 
 
-int main(void) {
-  get_config();
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    printf("You need to pass a file name as an argument. Exiting... \n");
+    return 0;
+  }
+  get_config(argv[1]);
   struct Connector tes;
   tes.type = CONNECTOR_TYPE_POWER;
   tes.conn.p = &(lo.powersource);
