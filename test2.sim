@@ -1,0 +1,33 @@
+S input1
+S input2
+S input3
+
+GX xor1
+GX xor2
+
+GA and1
+GA and2
+
+GO or1
+
+O S
+O COUT
+
+LNK POWER input1
+LNK POWER input2
+LNK POWER input3
+LNK input1 xor1
+LNK input2 xor1
+LNK xor1 xor2
+LNK xor1 and2
+LNK input1 and1
+LNK input2 and1
+
+LNK input3 and2
+LNK input3 xor2
+
+LNK and1 or1
+LNK and2 or1
+LNK or1 COUT
+
+LNK xor2 S

@@ -41,12 +41,14 @@ struct LocationObject get_connector(char name[500]) {
 			connect.array_num = ql;	
 		}
 	}
+
+
 	return connect;
 }
 
 int get_config(char filename[500]) {
 
-	
+
 	FILE * file = fopen(filename, "r");
 	if (file != NULL) {
 		char line[128];
@@ -65,6 +67,7 @@ int get_config(char filename[500]) {
 					break;
 				case 'G':
 					strcpy(lo.gates[lo.num_gates].name, substr(line, 3, strlen(line)-4));
+
 					switch (line[1]) {
 						case 'A':
 							lo.gates[lo.num_gates].gate_type = GATE_TYPE_AND;

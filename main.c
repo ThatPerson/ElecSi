@@ -86,7 +86,7 @@ struct Input lo;
 int logic_gate(struct Gate gate) {
   switch (gate.gate_type) {
     case GATE_TYPE_AND:
-      if (gate.inputs == 2) {
+      if (gate.inputs == gate.check && gate.check > 1) {
         return 1;
       }
       break;
@@ -96,7 +96,7 @@ int logic_gate(struct Gate gate) {
       }
       break;
     case GATE_TYPE_XOR: 
-      if (gate.check > 1 && gate.inputs != gate.check && gate.inputs > 0) {
+      if (gate.check > 1 && gate.inputs != gate.check && gate.inputs > 0 && gate.inputs == 1) {
         return 1;
       }
       break;
@@ -106,19 +106,25 @@ int logic_gate(struct Gate gate) {
 
 int time = 0;
 
-int run(struct Connector input, int pow);
+int run(struct Connector input, int pow, int gate_check);
 
-int run(struct Connector input, int pow) {
+int run(struct Connector input, int pow, int gate_check) {
   time = time + 1;
   int i, val = 0;
   struct Connection * conn;
   int set = 0;
+
+  int ploris = 1;
   switch (input.type) {
     case CONNECTOR_TYPE_GATE:
 
 
       input.conn.g->inputs += pow;
-      input.conn.g->check ++;
+      // Make it so it only increments one time per previous item. No idea how to do this yet.
+      if (input.conn.g->check != 0)
+        ploris = 0;
+      if (gate_check == 1)
+        input.conn.g->check ++;
 
       conn = &(input.conn.g->connections);
 //       printf("%d - %d\n", logic_gate(*input.conn.g), input.conn.g->inputs);
@@ -158,7 +164,8 @@ int run(struct Connector input, int pow) {
   }
   if (set == 1) {
     for (i = 0; i < conn->num_outputs; i++) {
-      run(conn->connectors[i], val);
+
+      run(conn->connectors[i], val, ploris);
     }
   } else {
   }
@@ -181,7 +188,12 @@ int main(int argc, char *argv[]) {
 
   int i;
   
-  run(tes, 1);
+  run(tes, 1, 1);
+  for (i = 0; i < lo.num_outputs; i++) {
+      if (lo.outputs[i].value != 0) {
+        printf("Output %s on\n", lo.outputs[i].name);
+      }
+    }
   char input_c[500], comp[500];
   while (strcmp(input_c, "exit") != 0) {
     //g.check = 0;
@@ -194,12 +206,11 @@ int main(int argc, char *argv[]) {
       lo.gates[i].check = 0;
       lo.gates[i].inputs = 0;
     }
-    lo.switches[0].value = 1;
     for (i = 0; i < lo.num_switches; i++) {
 		  if (strcmp(lo.switches[i].name, input_c) == 0) {
 			  if (strcmp(comp, "on") == 0) {
 				  lo.switches[i].value = 1;
-			  } else {
+			  } else if (strcmp(comp, "off") == 0) {
 			   	lo.switches[i].value = 0;
 			  }
 		  }
@@ -209,7 +220,7 @@ int main(int argc, char *argv[]) {
       lo.outputs[i].value = 0;
     }
 
-    run(tes, 1);
+    run(tes, 1, 1);
 
     for (i = 0; i < lo.num_outputs; i++) {
       if (lo.outputs[i].value != 0) {

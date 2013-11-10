@@ -1,12 +1,14 @@
 S swit
 S ots
-
-GX xor
-
-O output
-
+S switr
+GX plo
+GA qlo
 LNK POWER swit
 LNK POWER ots
-LNK ots xor
-LNK swit xor
-LNK xor output
+LNK swit plo
+LNK ots qlo
+LNK switr qlo
+LNK qlo plo
+O output
+LNK plo output
+LNK POWER qlo
