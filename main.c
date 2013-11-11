@@ -11,6 +11,7 @@
 #define CONNECTOR_TYPE_SWITCH 0x21
 #define CONNECTOR_TYPE_OUTPUT 0x22
 #define CONNECTOR_TYPE_GATE 0x23
+#define CONNECTOR_TYPE_DISPLAY 0x24
 
 struct Connector;
 struct Connection;
@@ -18,6 +19,7 @@ struct Gate;
 struct Output;
 struct Switch;
 struct Power;
+struct Display;
 
 struct Connector {
   int type;
@@ -26,6 +28,7 @@ struct Connector {
     struct Switch * s;
     struct Output * o;
     struct Gate * g;
+    struct Display * d;
   } conn;
 };
 
@@ -60,14 +63,22 @@ struct Power {
   struct Connection connections;
 };
 
+struct Display {
+  char name[500];
+  int checks;
+  int value;
+};
+
 struct Input {
   struct Power powersource;
   struct Switch switches[500];
   struct Output outputs[500];
   struct Gate gates[500];
+  struct Display displays[500];
   int num_switches;
   int num_outputs;
   int num_gates;
+  int num_displays;
 };
 
 struct Input lo;
@@ -120,7 +131,6 @@ int run(struct Connector input, int pow, int gate_check) {
 
 
       input.conn.g->inputs += pow;
-      // Make it so it only increments one time per previous item. No idea how to do this yet.
       if (input.conn.g->check != 0)
         ploris = 0;
       if (gate_check == 1)
@@ -159,6 +169,13 @@ int run(struct Connector input, int pow, int gate_check) {
       conn = &(input.conn.s->connections);
       set = 1;
       break;
+    case CONNECTOR_TYPE_DISPLAY:
+      input.conn.d->value += pow * (2^input.conn.d->checks);
+      if (gate_check == 1)
+        input.conn.d->checks++;
+      set = 0;
+      break;
+
     default:
       return 1;
   }
@@ -227,7 +244,11 @@ int main(int argc, char *argv[]) {
         printf("Output %s on\n", lo.outputs[i].name);
       }
     }
-
+    for (i = 0; i < lo.num_displays; i++) {
+      printf("Register %s is %d\n", lo.displays[i].name, lo.displays[i].value);
+      lo.displays[i].value = 0;
+      lo.displays[i].checks = 0;
+    }
   }
   return 1;
 }

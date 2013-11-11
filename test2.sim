@@ -31,3 +31,10 @@ LNK and2 or1
 LNK or1 COUT
 
 LNK xor2 S
+
+
+D display
+
+LNK S display
+LNK COUT display
+

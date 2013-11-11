@@ -41,7 +41,12 @@ struct LocationObject get_connector(char name[500]) {
 			connect.array_num = ql;	
 		}
 	}
-
+	for (ql = 0; ql < lo.num_displays; ql++) {
+		if (strcmp(lo.displays[ql].name, name) == 0) {
+			connect.type = CONNECTOR_TYPE_DISPLAY;
+			connect.array_num = ql;	
+		}
+	}
 
 	return connect;
 }
@@ -64,6 +69,12 @@ int get_config(char filename[500]) {
 				case 'O':
 					strcpy(lo.outputs[lo.num_outputs].name, substr(line, 2, strlen(line)-3));
 					lo.num_outputs++;
+					break;
+				case 'D':
+					strcpy(lo.displays[lo.num_displays].name, substr(line, 2, strlen(line)-3));
+					lo.displays[lo.num_displays].value = 0; 
+					lo.displays[lo.num_displays].checks = 0;
+					lo.num_displays++;
 					break;
 				case 'G':
 					strcpy(lo.gates[lo.num_gates].name, substr(line, 3, strlen(line)-4));
@@ -116,6 +127,10 @@ int get_config(char filename[500]) {
 									lo.powersource.connections.connectors[lo.powersource.connections.num_outputs].conn.o = &(lo.outputs[ci.array_num]);
 									done = 1;
 									break;
+								case CONNECTOR_TYPE_DISPLAY:
+									lo.powersource.connections.connectors[lo.powersource.connections.num_outputs].conn.d = &(lo.displays[ci.array_num]);
+									done = 1;
+									break;
 								default:
 									break;
 							}
@@ -146,6 +161,10 @@ int get_config(char filename[500]) {
 											lo.switches[co.array_num].connections.connectors[lo.switches[co.array_num].connections.num_outputs].conn.o = &(lo.outputs[ci.array_num]);
 											done = 1;
 											break;
+										case CONNECTOR_TYPE_DISPLAY:
+											lo.switches[co.array_num].connections.connectors[lo.switches[co.array_num].connections.num_outputs].conn.d = &(lo.displays[ci.array_num]);
+											done = 1;
+											break;
 										default:
 											break;
 									}
@@ -167,6 +186,10 @@ int get_config(char filename[500]) {
 											lo.gates[co.array_num].connections.connectors[lo.gates[co.array_num].connections.num_outputs].conn.o = &(lo.outputs[ci.array_num]);
 											done = 1;
 											break;
+										case CONNECTOR_TYPE_DISPLAY:
+											lo.gates[co.array_num].connections.connectors[lo.gates[co.array_num].connections.num_outputs].conn.d = &(lo.displays[ci.array_num]);
+											done = 1;
+											break;
 										default:
 											break;
 									}
@@ -186,6 +209,10 @@ int get_config(char filename[500]) {
 											break;
 										case CONNECTOR_TYPE_OUTPUT:
 											lo.outputs[co.array_num].connections.connectors[lo.outputs[co.array_num].connections.num_outputs].conn.o = &(lo.outputs[ci.array_num]);
+											done = 1;
+											break;
+										case CONNECTOR_TYPE_DISPLAY:
+											lo.outputs[co.array_num].connections.connectors[lo.outputs[co.array_num].connections.num_outputs].conn.d = &(lo.displays[ci.array_num]);
 											done = 1;
 											break;
 										default:
